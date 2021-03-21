@@ -45,22 +45,21 @@ class Creator(_Object):
                     self.x_vector = 0
             else:
                 if self.keys["up"]:
-                    self.y_vector = -1
+                    self.y_vector = -4
                 if self.keys["down"]:
-                    self.y_vector = 1
+                    self.y_vector = 4
                 if not (self.keys["up"] or self.keys["down"]):
                     self.y_vector = 0
 
                 if self.keys["left"]:
-                    self.x_vector = -1
+                    self.x_vector = -4
                 if self.keys["right"]:
-                    self.x_vector = 1
+                    self.x_vector = 4
                 if not (self.keys["left"] or self.keys["right"]):
                     self.x_vector = 0
 
             self.rect.x += self.x_vector
             self.rect.y += self.y_vector
-            self.rect.x += +1
 
             # if self.rect.x > 14144:
             #     self.rect.x = 14144

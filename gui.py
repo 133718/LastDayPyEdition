@@ -174,10 +174,10 @@ class Layers(object):
         # start_time = time.time()
         x = (-camera.x) // 64
         y = (-camera.y) // 64
-        for row in range(int(self.width / 64) + 1):
-            for collum in range((int(self.height / 64) + 1)):
+        for row in range(int(self.width / 64) + 2):
+            for collum in range((int(self.height / 64) + 2)):
                 screen.blit(self.array[row + abs(x), collum + abs(y)].get_tile(self.sprite_sheet),
-                            ((row * 64 + camera.x % 64), (collum + y) * 64))
+                            ((row * 64 - abs(camera.x) % 64), (collum * 64 - abs(camera.y) % 64)))
                 self.array[row + x, collum + y].activate(self.active_tile)
         for group in self.all_group:
             for sprite in group:
