@@ -6,7 +6,7 @@ import time
 
 
 def draw_fps():
-    image = font.render(str(player.rect.x) + " " + str(camera.x), False, (255, 255, 255))
+    image = font.render(str(pygame.mouse.get_pos()[0]) + " " + str(camera.x), False, (255, 255, 255))
     screen.blit(image, (0, 0))
 
 
@@ -16,10 +16,10 @@ HEIGHT = pygame.display.Info().current_h
 FPS = 60
 font = pygame.font.Font('fonts/font.ttf', 36)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-layers = gui.Layers()
-player = person.Creator(0, 0, 64, 64, layers.entity, state="Fly")
+layers = gui.Layers(file="level.npy")
+player = person.Creator(11000, 0, 64, 64, layers.entity, state="Fly")
 camera = Camera(player.rect)
-selected_box = gui.SelectedBox(player.rect, layers)
+selected_box = gui.SelectedBox(layers, camera)
 clock = pygame.time.Clock()
 running = True
 

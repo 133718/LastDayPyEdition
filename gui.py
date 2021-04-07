@@ -1,6 +1,6 @@
 import pygame as pg
 import numpy as np
-from tools import UObject
+from tools import UObject, Text
 from spitesheets import LevelSpriteSheet
 import time
 
@@ -30,11 +30,11 @@ class Camera(object):
         if self.y + self.player_rect.y < self.q_height:
             self.y = self.q_height - self.player_rect.y
 
-        if self.x <= -12288:
-            self.x = -12288
+        if self.x <= -10303:
+            self.x = -10303
 
-        if self.y <= -8192:
-            self.y = -8192
+        if self.y <= -7103:
+            self.y = -7103
 
         if self.x >= 0:
             self.x = 0
@@ -44,79 +44,110 @@ class Camera(object):
 
 
 class SelectedBox(UObject):
-    def __init__(self, player_rect, layers):
-        self.player_rect = player_rect
-        self.width = player_rect.width
-        self.height = self.player_rect.height
-        super().__init__((self.player_rect.x + self.width / 2) // self.width * self.width,
-                         (self.player_rect.y + self.height / 2) // self.height * self.height,
+    def __init__(self, layers, camera):
+        self.camera = camera
+        self.player_rect = pg.mouse.get_pos()
+        self.width = 64
+        self.height = 64
+        super().__init__((self.player_rect[0] - self.camera.x) // self.width * self.width,
+                         (self.player_rect[1] - self.camera.y) // self.height * self.height,
                          self.width, self.height)
 
         self.layers = layers
-        self.layers.GUI.add(self)
         self.image.fill(pg.Color(170, 170, 170))
         self.image.set_alpha(70)
         self.sprite = UObject(self.rect.x, self.rect.y, 64, 64)
         self.layers.GUI2.add(self.sprite)
+        self.layers.GUI2.add(self)
         self.state = True
 
+        self.text = Text(36, 1800, 20, text="L:1")
+        self.layers.GUI.add(self.text)
+
         self.keys = None
+        self.left_btn = False
+        self.right_btn = False
         self.toolbars = layers.sprite_sheet.toolbars
         self.toolbar = self.toolbars["block"]
         self.update_sprite(self.toolbar.get_item())
 
     def update(self, events, *args, **kwargs) -> None:
         self.update_img()
-        self.keys = {"left_btn": False,
-                     "right_btn": False,
-                     "up": False,
-                     "down": False,
-                     "block": False,
-                     "decoration": False,
-                     "top": False,
-                     "background": False
-                     }
+        self.keys = {
+            "up": False,
+            "down": False,
+            "left": False,
+            "right": False,
+            "block": False,
+            "decoration": False,
+            "top": False,
+            "background": False,
+            "save": False,
+            "select": False
+        }
         self.update_keys(events)
-        self.rect.x = (self.player_rect.x + self.width / 2) // self.width * self.width
-        self.rect.y = (self.player_rect.y + self.height / 2) // self.height * self.height
-
+        self.player_rect = pg.mouse.get_pos()
+        self.rect.x = (self.player_rect[0] - self.camera.x) // self.width * self.width
+        self.rect.y = (self.player_rect[1] - self.camera.y) // self.height * self.height
+        # TODO добавить поворот объектов
         if self.keys["up"]:
             self.toolbar.previous()
+            self.text.update_text(self.toolbar.layer_num)
 
         if self.keys["down"]:
             self.toolbar.next()
+            self.text.update_text(self.toolbar.layer_num)
+
+        if self.keys["left"]:
+            pass
 
         if self.keys["block"]:
             self.toolbar = self.toolbars["block"]
+            self.text.update_text(self.toolbar.layer_num)
 
         if self.keys["decoration"]:
             self.toolbar = self.toolbars["decoration"]
+            self.text.update_text(self.toolbar.layer_num)
 
         if self.keys["top"]:
             self.toolbar = self.toolbars["top"]
+            self.text.update_text(self.toolbar.layer_num)
 
         if self.keys["background"]:
             self.toolbar = self.toolbars["background"]
+            self.text.update_text(self.toolbar.layer_num)
 
-        if self.keys["left_btn"]:
+        if self.keys["save"]:
+            self.layers.save_level()
+
+        if self.keys["select"]:
+            self.toolbars["select"].set_item(self.layers.get_objects(self.rect.x // 64, self.rect.y // 64),
+                                             self.toolbar.layer_num)
+            self.toolbar = self.toolbars["select"]
+            # TODO нормально сделать метод select
+
+        if self.left_btn:
             self.layers.update_tile(self.rect.x // 64, self.rect.y // 64,
-                                    self.toolbar.layer_num, self.toolbar.get_item()[2])
+                                    self.toolbar.layer_num, self.toolbar.get_item())
 
-        if self.keys["right_btn"]:
-            pass
+        if self.right_btn:
+            self.layers.update_tile(self.rect.x // 64, self.rect.y // 64,
+                                    self.toolbar.layer_num, None)
 
         self.update_sprite(self.toolbar.get_item())
 
     def update_keys(self, events):
         for event in events:
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                self.keys["left_btn"] = True
+                self.left_btn = True
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 3:
-                self.keys["right_btn"] = True
+                self.right_btn = True
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 4:
                 self.keys["up"] = True
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 5:
                 self.keys["down"] = True
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 2:
+                self.keys["select"] = True
             if event.type == pg.KEYDOWN and event.key == pg.K_1:
                 self.keys["block"] = True
             if event.type == pg.KEYDOWN and event.key == pg.K_2:
@@ -125,6 +156,12 @@ class SelectedBox(UObject):
                 self.keys["top"] = True
             if event.type == pg.KEYDOWN and event.key == pg.K_4:
                 self.keys["background"] = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_i:
+                self.keys["save"] = True
+            if event.type == pg.MOUSEBUTTONUP and event.button == 1:
+                self.left_btn = False
+            if event.type == pg.MOUSEBUTTONUP and event.button == 3:
+                self.right_btn = False
 
     def update_img(self):
         surface = pg.Surface((self.width, self.height))
@@ -143,7 +180,7 @@ class SelectedBox(UObject):
     def update_sprite(self, item):
         self.sprite.rect.x = self.rect.x
         self.sprite.rect.y = self.rect.y
-        self.sprite.image = self.layers.sprite_sheet.get_sprite(item[2])
+        self.sprite.image = self.layers.sprite_sheet.get_tile(item["id"])
 
 
 class Layers(object):
@@ -154,21 +191,32 @@ class Layers(object):
         self.active_tile = []
         if file == "None":
             self.array = np.array(
-                [[Tile(sprites=(0, 0, 0, 55)) for _ in range(128)] for _ in range(192)], dtype=object)
+                [[Tile(sprites=(0, 0, 0, 62)) for _ in range(128)] for _ in range(192)], dtype=object)
         else:
             self.array = self.array = self.open_level(file)
 
         self.GUI = pg.sprite.Group()
         self.entity = pg.sprite.Group()
         self.GUI2 = pg.sprite.Group()
-        self.all_group = [self.entity, self.GUI2, self.GUI]
 
-    def update_tile(self, x, y, num_layer, num):
-        self.array[x, y].update_tile(num_layer, num, self.sprite_sheet)
-        # pg.image.save(self.array[x, y].get_tile(self.sprite_sheet), 'tile.png')
+    def update_tile(self, x, y, num_layer, tile=None):
+        if tile is None:
+            tile = {"size": [1, 1], "object": [0]}
+        cords = tile["object"]
+        i = 0
+        for y1 in range(tile["size"][1]):
+            for x1 in range(tile["size"][0]):
+                try:
+                    self.array[x + x1, y + y1].update_tile(num_layer, cords[i], self.sprite_sheet)
+                except IndexError:
+                    print(x, y, num_layer, tile, i, x1, y1)
+                i += 1
 
     def get_tile(self, x, y):
         return self.array[x, y]
+
+    def get_objects(self, x, y):
+        return self.sprite_sheet.to_tile(self.get_tile(x, y).layers)
 
     def draw(self, screen, camera):
         # start_time = time.time()
@@ -179,9 +227,12 @@ class Layers(object):
                 screen.blit(self.array[row + abs(x), collum + abs(y)].get_tile(self.sprite_sheet),
                             ((row * 64 - abs(camera.x) % 64), (collum * 64 - abs(camera.y) % 64)))
                 self.array[row + x, collum + y].activate(self.active_tile)
-        for group in self.all_group:
-            for sprite in group:
-                screen.blit(sprite.image, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
+        for sprite in self.entity:
+            screen.blit(sprite.image, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
+        for sprite in self.GUI2:
+            screen.blit(sprite.image, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
+        for sprite in self.GUI:
+            screen.blit(sprite.image, (sprite.rect.x, sprite.rect.y))
         self.update_array()
         # print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -191,10 +242,8 @@ class Layers(object):
         y = 0
         for row in self.array:
             for tile in row:
-                array[x, y, 0] = tile.top
-                array[x, y, 1] = tile.decoration
-                array[x, y, 2] = tile.block
-                array[x, y, 3] = tile.background
+                array[x, y] = tile.layers
+
                 y += 1
             y = 0
             x += 1
@@ -258,13 +307,13 @@ class Tile(object):
     def update_sprite(self, sprite_sheet):
         tile = pg.Surface((64, 64), pg.SRCALPHA)
         if self.layers[3] != 0:
-            tile.blit(sprite_sheet.get_sprite(self.layers[3]), (0, 0))
+            tile.blit(sprite_sheet.get_object(self.layers[3]), (0, 0))
         if self.layers[2] != 0:
-            tile.blit(sprite_sheet.get_sprite(self.layers[2]), (0, 0))
+            tile.blit(sprite_sheet.get_object(self.layers[2]), (0, 0))
         if self.layers[1] != 0:
-            tile.blit(sprite_sheet.get_sprite(self.layers[1]), (0, 0))
+            tile.blit(sprite_sheet.get_object(self.layers[1]), (0, 0))
         if self.layers[0] != 0:
-            tile.blit(sprite_sheet.get_sprite(self.layers[0]), (0, 0))
+            tile.blit(sprite_sheet.get_object(self.layers[0]), (0, 0))
         self.tile = tile
 
     def activate(self, array):

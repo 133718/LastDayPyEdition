@@ -107,3 +107,5 @@ class Creator(_Object):
                 self.keys["left_btn"] = False
             if event.type == pg.MOUSEBUTTONUP and event.button == 3:
                 self.keys["right_btn"] = False
+
+# TODO Сделать класс игрока

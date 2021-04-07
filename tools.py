@@ -16,3 +16,16 @@ class UObject(_Object):
 
     def update(self, events, *args, **kwargs) -> None:
         pass
+
+
+class Text(UObject):
+    def __init__(self, size, x, y, text=""):
+        self.text = text
+        self.font = pg.font.Font("fonts/font.ttf", size)
+        self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
+        super().__init__(x, y, self.image.get_width(), self.image.get_height())
+        self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
+
+    def update_text(self, layer):
+        self.text = "L:{0}".format(layer + 1)
+        self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
