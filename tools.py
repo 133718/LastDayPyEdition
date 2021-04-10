@@ -26,6 +26,6 @@ class Text(UObject):
         super().__init__(x, y, self.image.get_width(), self.image.get_height())
         self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
 
-    def update_text(self, layer):
-        self.text = "L:{0}".format(layer + 1)
+    def update_text(self, layer, rotate):
+        self.text = "L:{0} R:{1}".format(layer + 1, rotate)
         self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))

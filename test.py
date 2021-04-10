@@ -6,7 +6,7 @@ import time
 
 
 def draw_fps():
-    image = font.render(str(pygame.mouse.get_pos()[0]) + " " + str(camera.x), False, (255, 255, 255))
+    image = font.render(str(clock.get_fps()) + " " + str(player.rect.y), False, (255, 255, 255))
     screen.blit(image, (0, 0))
 
 

@@ -17,66 +17,65 @@ class LevelSpriteSheet(object):
         }
 
         self.block = [
-            self.tiles[40],
-            self.tiles[41],
-            self.tiles[42],
-            self.tiles[43],
-            self.tiles[46],
-            self.tiles[49],
-            self.tiles[52],
-            self.tiles[53],
-            self.tiles[54],
-            self.tiles[55],
-            self.tiles[11],
-            self.tiles[33],
-            self.tiles[34],
-            self.tiles[35],
-            self.tiles[21],
-            self.tiles[22],
-            self.tiles[23],
-            self.tiles[32],
-            self.tiles[20],
-        ]
-        self.background = [
-            self.tiles[47],
-            self.tiles[48],
+            self.tiles[1],
             self.tiles[2],
             self.tiles[3],
-            self.tiles[13],
-            self.tiles[14],
-            self.tiles[1],
-            self.tiles[12]
-        ]
-        self.decoration = [
             self.tiles[4],
             self.tiles[5],
             self.tiles[6],
             self.tiles[7],
+            self.tiles[8],
+            self.tiles[9],
+            self.tiles[10],
+            self.tiles[11],
+            self.tiles[12],
+            self.tiles[13],
+            self.tiles[14],
             self.tiles[15],
             self.tiles[16],
-            self.tiles[9],
+            self.tiles[17],
             self.tiles[18],
+            self.tiles[19],
+        ]
+        self.background = [
+            self.tiles[20],
+            self.tiles[21],
+            self.tiles[22],
+            self.tiles[23],
             self.tiles[24],
             self.tiles[25],
             self.tiles[26],
-            self.tiles[27],
+            self.tiles[27]
+        ]
+        self.decoration = [
             self.tiles[28],
             self.tiles[29],
             self.tiles[30],
-            self.tiles[38],
             self.tiles[31],
+            self.tiles[32],
+            self.tiles[33],
+            self.tiles[35],
+            self.tiles[36],
+            self.tiles[37],
+            self.tiles[38],
             self.tiles[39],
+            self.tiles[40],
+            self.tiles[43],
             self.tiles[44],
             self.tiles[45],
-            self.tiles[36],
-            self.tiles[37]
+            self.tiles[46],
+            self.tiles[47],
+            self.tiles[48],
         ]
 
         self.top = [
-            self.tiles[8],
-            self.tiles[17],
-            self.tiles[10],
-            self.tiles[19],
+            self.tiles[49],
+            self.tiles[51],
+            self.tiles[50],
+            self.tiles[52],
+            self.tiles[34],
+            self.tiles[41],
+            self.tiles[42]
         ]
 
         self.toolbars = {
@@ -88,9 +87,14 @@ class LevelSpriteSheet(object):
         }
 
     def get_tile(self, num):
-        img = self.sprite_sheet.subsurface((self.tiles[num]["cords"][0], self.tiles[num]["cords"][1],
-                                            self.tiles[num]["size"][0] * 64, self.tiles[num]["size"][1] * 64))
-        return img
+        try:
+            img = self.sprite_sheet.subsurface((self.tiles[num]["cords"][0], self.tiles[num]["cords"][1],
+                                                self.tiles[num]["size"][0] * 64, self.tiles[num]["size"][1] * 64))
+            return img
+        except ValueError:
+            print(num, self.tiles[num]["cords"][0], self.tiles[num]["cords"][1],
+                  self.tiles[num]["size"][0] * 64, self.tiles[num]["size"][1] * 64)
+            Exception(ValueError)
 
     def get_object(self, num):
         img = self.sprite_sheet.subsurface((self.objects[num][0], self.objects[num][1], 64, 64))
@@ -108,19 +112,32 @@ class Toolbar(object):
         self.toolbar = toolbar_array
         self.item = 0
         self.layer_num = layer_num
+        self.rotate = 0
 
     def get_item(self):
         return self.toolbar[self.item]
 
     def next(self):
+        self.rotate = 0
         self.item += 1
         if self.item > len(self.toolbar) - 1:
             self.item = 0
 
     def previous(self):
+        self.rotate = 0
         self.item -= 1
         if self.item < 0:
             self.item = len(self.toolbar) - 1
+
+    def r_left(self):
+        self.rotate -= 1
+        if self.rotate < 0:
+            self.rotate = len(self.get_item()["object"]) - 1
+
+    def r_right(self):
+        self.rotate += 1
+        if self.rotate > len(self.get_item()["object"]) - 1:
+            self.rotate = 0
 
 
 class Select(Toolbar):
@@ -133,12 +150,14 @@ class Select(Toolbar):
         self.layer_num = layer
 
     def next(self):
+        self.rotate = 0
         self.item += 1
         if self.item > len(self.toolbar) - 1:
             self.item = 0
         self.layer_num = self.item
 
     def previous(self):
+        self.rotate = 0
         self.item -= 1
         if self.item < 0:
             self.item = len(self.toolbar) - 1
