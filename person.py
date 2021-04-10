@@ -61,14 +61,14 @@ class Creator(_Object):
             self.rect.x += self.x_vector
             self.rect.y += self.y_vector
 
-            # if self.rect.x > 14144:
-            #     self.rect.x = 14144
-            # if self.rect.x < 0:
-            #     self.rect.x = 0
-            # if self.rect.y > 9152:
-            #     self.rect.y = 9152
-            # if self.rect.y < 0:
-            #     self.rect.y = 0
+            if self.rect.x > 12224:
+                self.rect.x = 12224
+            if self.rect.x < 0:
+                self.rect.x = 0
+            if self.rect.y > 8128:
+                self.rect.y = 8128
+            if self.rect.y < 0:
+                self.rect.y = 0
 
     def update_keys(self, events):
         for event in events:
