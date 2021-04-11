@@ -1,5 +1,6 @@
 import pygame as pg
 import json
+from tools import Select, Toolbar
 
 
 class LevelSpriteSheet(object):
@@ -105,60 +106,3 @@ class LevelSpriteSheet(object):
         for i in num:
             array.append(self.tiles[self.index[i]])
         return array
-
-
-class Toolbar(object):
-    def __init__(self, toolbar_array, layer_num):
-        self.toolbar = toolbar_array
-        self.item = 0
-        self.layer_num = layer_num
-        self.rotate = 0
-
-    def get_item(self):
-        return self.toolbar[self.item]
-
-    def next(self):
-        self.rotate = 0
-        self.item += 1
-        if self.item > len(self.toolbar) - 1:
-            self.item = 0
-
-    def previous(self):
-        self.rotate = 0
-        self.item -= 1
-        if self.item < 0:
-            self.item = len(self.toolbar) - 1
-
-    def r_left(self):
-        self.rotate -= 1
-        if self.rotate < 0:
-            self.rotate = len(self.get_item()["object"]) - 1
-
-    def r_right(self):
-        self.rotate += 1
-        if self.rotate > len(self.get_item()["object"]) - 1:
-            self.rotate = 0
-
-
-class Select(Toolbar):
-    def __init__(self, toolbar_array, layer_num):
-        super().__init__(toolbar_array, layer_num)
-        self.layer_num = self.item
-
-    def set_item(self, items, layer):
-        self.toolbar = items
-        self.layer_num = layer
-
-    def next(self):
-        self.rotate = 0
-        self.item += 1
-        if self.item > len(self.toolbar) - 1:
-            self.item = 0
-        self.layer_num = self.item
-
-    def previous(self):
-        self.rotate = 0
-        self.item -= 1
-        if self.item < 0:
-            self.item = len(self.toolbar) - 1
-        self.layer_num = self.item

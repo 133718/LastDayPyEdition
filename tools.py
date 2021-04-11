@@ -29,3 +29,93 @@ class Text(UObject):
     def update_text(self, layer, rotate):
         self.text = "L:{0} R:{1}".format(layer + 1, rotate)
         self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
+
+
+class Toolbar(object):
+    def __init__(self, toolbar_array, layer_num):
+        self.toolbar = toolbar_array
+        self.item = 0
+        self.layer_num = layer_num
+        self.rotate = 0
+
+    def get_item(self):
+        return self.toolbar[self.item]
+
+    def next(self):
+        self.rotate = 0
+        self.item += 1
+        if self.item > len(self.toolbar) - 1:
+            self.item = 0
+
+    def previous(self):
+        self.rotate = 0
+        self.item -= 1
+        if self.item < 0:
+            self.item = len(self.toolbar) - 1
+
+    def r_left(self):
+        self.rotate -= 1
+        if self.rotate < 0:
+            self.rotate = len(self.get_item()["object"]) - 1
+
+    def r_right(self):
+        self.rotate += 1
+        if self.rotate > len(self.get_item()["object"]) - 1:
+            self.rotate = 0
+
+
+class Select(Toolbar):
+    def __init__(self, toolbar_array, layer_num):
+        super().__init__(toolbar_array, layer_num)
+        self.layer_num = self.item
+
+    def set_item(self, items, layer):
+        self.toolbar = items
+        self.layer_num = layer
+
+    def next(self):
+        self.rotate = 0
+        self.item += 1
+        if self.item > len(self.toolbar) - 1:
+            self.item = 0
+        self.layer_num = self.item
+
+    def previous(self):
+        self.rotate = 0
+        self.item -= 1
+        if self.item < 0:
+            self.item = len(self.toolbar) - 1
+        self.layer_num = self.item
+
+
+class Keys(object):
+    def __init__(self):
+        self.left = False
+        self.right = False
+        self.up = False
+        self.down = False
+        self.jump = False
+
+    def update(self, events):
+        for event in events:
+            if event.type == pg.KEYDOWN and event.key == pg.K_a:
+                self.left = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_d:
+                self.right = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                self.jump = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_w:
+                self.up = True
+            if event.type == pg.KEYDOWN and event.key == pg.K_s:
+                self.down = True
+
+            if event.type == pg.KEYUP and event.key == pg.K_d:
+                self.right = False
+            if event.type == pg.KEYUP and event.key == pg.K_a:
+                self.left = False
+            if event.type == pg.KEYUP and event.key == pg.K_SPACE:
+                self.jump = False
+            if event.type == pg.KEYUP and event.key == pg.K_w:
+                self.up = False
+            if event.type == pg.KEYUP and event.key == pg.K_s:
+                self.down = False

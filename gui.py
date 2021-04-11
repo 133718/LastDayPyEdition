@@ -30,12 +30,12 @@ class Camera(object):
         if self.y + self.player_rect.y < self.q_height:
             self.y = self.q_height - self.player_rect.y
 
-        # if self.x <= -10303:
-        #     self.x = -10303
-        #
-        # if self.y <= -7103:
-        #     self.y = -7103
-        #
+        if self.x <= -10368:
+            self.x = -10368
+
+        if self.y <= -7112:
+            self.y = -7112
+
         if self.x >= 0:
             self.x = 0
 
@@ -241,7 +241,7 @@ class Layers(object):
         y = (-camera.y) // 64
         for row in range(int(self.width / 64) + 2):
             for collum in range((int(self.height / 64) + 2)):
-                if 192 > x + row >= 0 and 128 > y + collum >= 0:
+                if self.array.shape[0] > x + row >= 0 and self.array.shape[1] > y + collum >= 0:
                     screen.blit(self.array[row + abs(x), collum + abs(y)].get_tile(self.sprite_sheet),
                                 ((row * 64 - abs(camera.x) % 64), (collum * 64 - abs(camera.y) % 64)))
                     self.array[row + x, collum + y].activate(self.active_tile)
@@ -281,13 +281,18 @@ class Layers(object):
         return array
 
     def update_array(self):
-        # start_time = time.time()
+        # start_time = time.time()s
         for tile in self.active_tile:
             tile.update()
             if tile.active <= 0:
                 tile.tile = None
                 self.active_tile.remove(tile)
         # print("--- %s seconds ---" % (time.time() - start_time))
+
+    def get_tiles(self, center):
+        x = center[0] // 64
+        y = center[1] // 64
+        return self.array[x-1:x+2, y-1:y+2]
 
 
 class Tile(object):
@@ -321,7 +326,7 @@ class Tile(object):
         return self.layers
 
     def block_chek(self):
-        if self.layers[2] != 0:
+        if self.layers[2] != 0 and self.layers[2] != 14:
             self.state = "block"
         else:
             self.state = "Air"
