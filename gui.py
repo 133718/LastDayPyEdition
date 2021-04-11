@@ -326,10 +326,12 @@ class Tile(object):
         return self.layers
 
     def block_chek(self):
-        if self.layers[2] != 0 and self.layers[2] != 14:
+        if self.layers[2] == 14:
+            self.state = "ladder"
+        elif self.layers[2] != 0:
             self.state = "block"
         else:
-            self.state = "Air"
+            self.state = "air"
 
     def update_sprite(self, sprite_sheet):
         tile = pg.Surface((64, 64), pg.SRCALPHA)

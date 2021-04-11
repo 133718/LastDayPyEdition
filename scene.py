@@ -13,6 +13,7 @@ class Scene(object):
         self.clock = pg.time.Clock()
         self.screen = surface
         self.running = True
+        self.font = pg.font.Font('fonts/font.ttf', 36)
         self.FPS = 60
 
     def run(self):
@@ -25,5 +26,10 @@ class Scene(object):
                     self.running = False
             self.screen.fill((0, 0, 0))
             self.layers.draw(self.screen, self.camera)
+            self.draw_fps()
             pg.display.update()
             self.clock.tick(self.FPS)
+
+    def draw_fps(self):
+        image = self.font.render(str(self.player.state), False, (255, 255, 255))
+        self.screen.blit(image, (0, 0))

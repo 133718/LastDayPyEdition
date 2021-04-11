@@ -117,9 +117,10 @@ class Player(_Object):
         self.x_vector = 0
         self.y_vector = 0
         self.move_speed = 8
+        self.climb_speed = 4
         self.boost = 2
         self.gravity = 0.7
-        self.jump_boost = 20
+        self.jump_boost = 14
         self.state = "Move"
         self.on_ground = False
         self.speed_protect = 1
@@ -127,7 +128,39 @@ class Player(_Object):
 
     def update(self, events, tiles, *args, **kwargs) -> None:
         self.keys.update(events)
-        if self.state == "Move":
+        if self.state == "Climb":
+            if self.on_ground:
+                self.state = "Move"
+
+            if tiles[1, 1].state == "ladder" or tiles[1, 2].state == "ladder" and self.rect.y % 64 > 9:
+                if self.rect.centerx % 64 > 32:
+                    self.rect.x -= 2
+                elif self.rect.centerx % 64 < 32:
+                    self.rect.x += 2
+
+                if self.keys.jump:
+                    self.state = "Move"
+                    self.y_vector = -self.jump_boost
+                    return
+
+                if self.keys.up:
+                    self.y_vector = -self.climb_speed
+
+                if self.keys.down:
+                    self.y_vector = self.climb_speed
+
+                if not (self.keys.up or self.keys.down):
+                    self.y_vector = 0
+
+            else:
+                x = (self.rect.centerx // 64 + 2) * 64
+                y = (self.rect.centery // 64 + 1) * 64
+                rect = pg.Rect(x, y, 64, 64)
+                self.rect.bottom = rect.y
+                self.y_vector = 0
+                self.state = "Move"
+
+        elif self.state == "Move":
             if self.keys.jump and self.on_ground:
                 self.y_vector = -self.jump_boost
 
@@ -152,12 +185,20 @@ class Player(_Object):
                 elif self.x_vector < -self.max_move_speed:
                     self.x_vector = -self.max_move_speed
 
-            self.on_ground = False
-            self.rect.y += self.y_vector
-            self.collide(0, self.y_vector, tiles)
+            if (self.keys.up and tiles[1, 1].state == "ladder") or (self.keys.down and tiles[1, 2].state == "ladder"):
+                if self.y_vector >= 0:
+                    if self.keys.down and tiles[1, 2].state == "ladder":
+                        self.rect.y += 10
+                    self.state = "Climb"
+                    self.y_vector = 0
+                    self.x_vector = 0
 
-            self.rect.x += self.x_vector
-            self.collide(self.x_vector, 0, tiles)
+        self.on_ground = False
+        self.rect.y += self.y_vector
+        self.collide(0, self.y_vector, tiles)
+
+        self.rect.x += self.x_vector
+        self.collide(self.x_vector, 0, tiles)
 
     def collide(self, x_vector, y_vector, tiles):
         rects = []
@@ -206,17 +247,25 @@ class Player(_Object):
                     self.rect.bottom = rects[7].top
                     self.on_ground = True
                     self.y_vector = 0
+                    self.state = "Move"
             if self.rect.x % 64 < 0:
                 if rects[7].colliderect(self.rect) and tiles[1, 2].state == "block" or rects[6].colliderect(
                         self.rect) and tiles[0, 2].state == "block":
                     self.rect.bottom = rects[7].top
                     self.on_ground = True
                     self.y_vector = 0
+                    self.state = "Move"
             else:
                 if rects[7].colliderect(self.rect) and tiles[1, 2].state == "block":
                     self.rect.bottom = rects[7].top
                     self.on_ground = True
                     self.y_vector = 0
+                    self.state = "Move"
+            if rects[7].colliderect(self.rect) and tiles[1, 2].state == "ladder" and self.state == "Move" and tiles[
+                1, 1].state != "ladder":
+                self.rect.top = rects[1].bottom
+                self.on_ground = True
+                self.y_vector = 0
 
         if y_vector < 0:
             if self.rect.x % 64 > 0:
@@ -233,4 +282,3 @@ class Player(_Object):
                 if rects[7].colliderect(self.rect) and tiles[1, 0].state == "block":
                     self.rect.top = rects[1].bottom
                     self.y_vector = 0
-
