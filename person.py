@@ -1,5 +1,6 @@
-from tools import UObject, Keys, _Object
+from tools import UObject, Keys, _Object, Trigger
 import pygame as pg
+from mama import Texture
 
 
 class Creator(UObject):
@@ -104,7 +105,6 @@ class Creator(UObject):
                 self.keys["right_btn"] = False
 
 
-# TODO Сделать класс игрока
 class Player(_Object):
     def __init__(self, x, y, width, height, layer):
         super().__init__(x, y, width, height)
@@ -119,12 +119,17 @@ class Player(_Object):
         self.move_speed = 8
         self.climb_speed = 4
         self.boost = 2
-        self.gravity = 0.7
-        self.jump_boost = 14
+        self.gravity = 0.5
+        self.jump_boost = 12
         self.state = "Move"
         self.on_ground = False
         self.speed_protect = 1
-        self.max_move_speed = 8
+        self.max_move_speed_x = 10
+        self.max_move_speed_y = 30
+
+        self.texture = Texture([0, 0])
+        self.ground_trigger = Trigger(self.rect.x, self.rect.bottom + 1, self.rect.width, 1)
+        self.on_ground_trigger = False
 
     def update(self, events, tiles, *args, **kwargs) -> None:
         self.keys.update(events)
@@ -175,15 +180,17 @@ class Player(_Object):
 
             if not (self.keys.left or self.keys.right):
                 if self.x_vector > 0:
-                    self.x_vector -= self.move_speed
+                    self.x_vector = 0
                 elif self.x_vector < 0:
-                    self.x_vector += self.move_speed
+                    self.x_vector = 0
 
             if self.speed_protect == 1:
-                if self.x_vector > self.max_move_speed:
-                    self.x_vector = self.max_move_speed
-                elif self.x_vector < -self.max_move_speed:
-                    self.x_vector = -self.max_move_speed
+                if self.x_vector > self.max_move_speed_x:
+                    self.x_vector = self.max_move_speed_x
+                elif self.x_vector < -self.max_move_speed_x:
+                    self.x_vector = -self.max_move_speed_x
+                if self.y_vector >= self.max_move_speed_y:
+                    self.y_vector = self.max_move_speed_y
 
             if (self.keys.up and tiles[1, 1].state == "ladder") or (self.keys.down and tiles[1, 2].state == "ladder"):
                 if self.y_vector >= 0:
@@ -200,6 +207,11 @@ class Player(_Object):
         self.rect.x += self.x_vector
         self.collide(self.x_vector, 0, tiles)
 
+        self.ground_trigger.update(self.rect.x, self.rect.bottom + 1, tiles)
+        self.on_ground_trigger = self.ground_trigger.collide
+
+        self.texture.update(self)
+
     def collide(self, x_vector, y_vector, tiles):
         rects = []
         for collum in range(3):
@@ -209,12 +221,12 @@ class Player(_Object):
                 rects.append(pg.Rect(x, y, 64, 64))
 
         if x_vector > 0:
-            if self.rect.y % 64 < 0:
+            if self.rect.y % 64 > 0:
                 if rects[5].colliderect(self.rect) and tiles[2, 1].state == "block" or rects[8].colliderect(
                         self.rect) and tiles[2, 2].state == "block":
                     self.rect.right = rects[5].left
                     self.x_vector = 0
-            if self.rect.y % 64 > 0:
+            if self.rect.y % 64 < 0:
                 if rects[5].colliderect(self.rect) and tiles[2, 1].state == "block" or rects[2].colliderect(
                         self.rect) and tiles[2, 0].state == "block":
                     self.rect.right = rects[5].left
@@ -225,12 +237,12 @@ class Player(_Object):
                     self.x_vector = 0
 
         if x_vector < 0:
-            if self.rect.y % 64 < 0:
+            if self.rect.y % 64 > 0:
                 if rects[3].colliderect(self.rect) and tiles[0, 1].state == "block" or rects[6].colliderect(
                         self.rect) and tiles[0, 2].state == "block":
                     self.rect.left = rects[3].right
                     self.x_vector = 0
-            if self.rect.y % 64 > 0:
+            if self.rect.y % 64 < 0:
                 if rects[3].colliderect(self.rect) and tiles[0, 1].state == "block" or rects[0].colliderect(
                         self.rect) and tiles[0, 0].state == "block":
                     self.rect.left = rects[3].right

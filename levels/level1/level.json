@@ -1,8 +1,9 @@
 {
 	"level":
 	{
-		"level_data": "levels/level1/level.npy",
-		"startX": 96,
-		"startY": 64
+		"level_name" : "start_screen",
+		"level_data": "None",
+		"player": "None",
+"gui":[{"name": "Logo","x": 0,"y": 0}]
 	}
 }

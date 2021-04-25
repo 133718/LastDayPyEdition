@@ -26,8 +26,8 @@ class Text(UObject):
         super().__init__(x, y, self.image.get_width(), self.image.get_height())
         self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
 
-    def update_text(self, layer, rotate):
-        self.text = "L:{0} R:{1}".format(layer + 1, rotate)
+    def update_text(self, text):
+        self.text = text
         self.image = self.font.render(self.text, False, pg.Color(255, 255, 255))
 
 
@@ -119,3 +119,39 @@ class Keys(object):
                 self.up = False
             if event.type == pg.KEYUP and event.key == pg.K_s:
                 self.down = False
+
+
+class Trigger(pg.sprite.Sprite):
+    def __init__(self, x, y, width, height):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((width, height))
+        self.image.fill(pg.Color(0, 255, 255))
+        self.image.set_alpha(127)
+        self.rect = pg.Rect(x, y, width, height)
+        self.collide = False
+
+    def update(self, x, y, tiles):
+        rects = []
+        self.collide = False
+        for collum in range(3):
+            for row in range(3):
+                x = (self.rect.centerx // 64 + (row - 1)) * 64
+                y = (self.rect.centery // 64 + (collum - 1)) * 64
+                rects.append(pg.Rect(x, y, 64, 64))
+
+        self.rect.x = x
+        self.rect.y = y
+        if self.rect.x % 64 > 0:
+            if rects[7].colliderect(self.rect) and tiles[1, 2].state == "block" or rects[8].colliderect(
+                    self.rect) and tiles[2, 2].state == "block":
+                self.rect.bottom = rects[7].top
+                self.collide = False
+        if self.rect.x % 64 < 0:
+            if rects[7].colliderect(self.rect) and tiles[1, 2].state == "block" or rects[6].colliderect(
+                    self.rect) and tiles[0, 2].state == "block":
+                self.rect.bottom = rects[7].top
+                self.collide = False
+        else:
+            if rects[7].colliderect(self.rect) and tiles[1, 2].state == "block":
+                self.rect.bottom = rects[7].top
+                self.collide = False

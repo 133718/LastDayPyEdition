@@ -80,30 +80,30 @@ class SelectedBox(UObject):
         # TODO добавить поворот объектов
         if self.keys["up"]:
             self.toolbar.previous()
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["down"]:
             self.toolbar.next()
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["left"]:
             pass
 
         if self.keys["block"]:
             self.toolbar = self.toolbars["block"]
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["decoration"]:
             self.toolbar = self.toolbars["decoration"]
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["top"]:
             self.toolbar = self.toolbars["top"]
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["background"]:
             self.toolbar = self.toolbars["background"]
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["save"]:
             self.layers.save_level()
@@ -115,11 +115,11 @@ class SelectedBox(UObject):
 
         if self.keys["r_left"]:
             self.toolbar.r_right()
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.keys["r_right"]:
             self.toolbar.r_left()
-            self.text.update_text(self.toolbar.layer_num, self.toolbar.rotate)
+            self.text.update_text("L:{0} R:{1}".format(self.toolbar.layer_num + 1, self.toolbar.rotate))
 
         if self.left_btn:
             self.layers.update_tile(self.rect.x // 64, self.rect.y // 64,
@@ -246,7 +246,7 @@ class Layers(object):
                                 ((row * 64 - abs(camera.x) % 64), (collum * 64 - abs(camera.y) % 64)))
                     self.array[row + x, collum + y].activate(self.active_tile)
         for sprite in self.entity:
-            screen.blit(sprite.image, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
+            screen.blit(sprite.texture.img, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
         for sprite in self.GUI2:
             screen.blit(sprite.image, (sprite.rect.x + camera.x, sprite.rect.y + camera.y))
         for sprite in self.GUI:

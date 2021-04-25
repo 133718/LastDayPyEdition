@@ -3,6 +3,7 @@ import person
 import gui
 from gui import Camera
 import time
+# import menu
 
 
 def draw_fps():
@@ -23,7 +24,6 @@ selected_box = gui.SelectedBox(layers, camera)
 clock = pygame.time.Clock()
 running = True
 
-
 while running:
     start_time = time.time()
     events = pygame.event.get()
@@ -33,6 +33,12 @@ while running:
     for event in events:
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                pass
+                #p = menu.PauseMenu(screen)
+                #p.run()
+
     screen.fill((0, 0, 0))
     layers.draw(screen, camera)
     draw_fps()
